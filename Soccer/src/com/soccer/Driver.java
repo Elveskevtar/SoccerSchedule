@@ -62,27 +62,19 @@ public class Driver {
 		}
 		for (int i = 0; i < dates.length; i++) {
 			System.out.println("DAY " + (start + i + 1));
-			System.out
-					.println(dates[i].getGame1().getTeam1().getTeamName()
-							+ " v. "
-							+ dates[i].getGame1().getTeam2().getTeamName());
-			System.out
-					.println(dates[i].getGame2().getTeam1().getTeamName()
-							+ " v. "
-							+ dates[i].getGame2().getTeam2().getTeamName());
-			System.out
-					.println(dates[i].getGame3().getTeam1().getTeamName()
-							+ " v. "
-							+ dates[i].getGame3().getTeam2().getTeamName());
-			System.out
-					.println(dates[i].getGame4().getTeam1().getTeamName()
-							+ " v. "
-							+ dates[i].getGame4().getTeam2().getTeamName());
+			System.out.println(dates[i].getGame1().getTeam1().getTeamName()
+					+ " v. " + dates[i].getGame1().getTeam2().getTeamName());
+			System.out.println(dates[i].getGame2().getTeam1().getTeamName()
+					+ " v. " + dates[i].getGame2().getTeam2().getTeamName());
+			System.out.println(dates[i].getGame3().getTeam1().getTeamName()
+					+ " v. " + dates[i].getGame3().getTeam2().getTeamName());
+			System.out.println(dates[i].getGame4().getTeam1().getTeamName()
+					+ " v. " + dates[i].getGame4().getTeam2().getTeamName());
 			if (!ext)
-				System.out.println(dates[i].getGame5().getTeam1()
-						.getTeamName()
-						+ " v. "
-						+ dates[i].getGame5().getTeam2().getTeamName());
+				System.out
+						.println(dates[i].getGame5().getTeam1().getTeamName()
+								+ " v. "
+								+ dates[i].getGame5().getTeam2().getTeamName());
 		}
 		return dates;
 	}
@@ -92,39 +84,56 @@ public class Driver {
 		Collections.shuffle(teams);
 		if (teams.get(0).getTeamsHaventPlayed().size() == 0) {
 			teams.get(0).populateList();
-			for (Team team : template)
-				if (!team.getTeamName().equals(teams.get(0).getTeamName()))
-					team.getTeamsHaventPlayed().add(teams.get(0));
+			/*
+			 * for (Team team : template) if
+			 * (!team.getTeamName().equals(teams.get(0).getTeamName()))
+			 * team.getTeamsHaventPlayed().add(teams.get(0));
+			 */
 		}
 		int breaker = 0;
 		while (!crossReferenceTeamList(teams, teams.get(0)
-				.getTeamsHaventPlayed())) {
+				.getTeamsHaventPlayed())
+				|| !crossReferenceTeamList(teams.get(0).getTeamsHaventPlayed(),
+						teams.get(0).getTeamsHaventPlayed().get(0)
+								.getTeamsHaventPlayed())) {
 			Collections.shuffle(teams);
+			for (Team team : teams) {
+			}
 			if (teams.get(0).getTeamsHaventPlayed().size() == 0) {
 				teams.get(0).populateList();
-				for (Team team : template)
-					if (!team.getTeamName().equals(teams.get(0).getTeamName()))
-						team.getTeamsHaventPlayed().add(teams.get(0));
+				/*
+				 * for (Team team : template) if
+				 * (!team.getTeamName().equals(teams.get(0).getTeamName()))
+				 * team.getTeamsHaventPlayed().add(teams.get(0));
+				 */
 			}
 			breaker++;
-			if (breaker == 50)
+			if (breaker == 100)
 				return null;
 		}
 		Team team1 = teams.get(0);
 		teams.remove(0);
 		int z = 0;
-		for (int i = 0; i < teams.size(); i++) {
-			for (int j = 0; j < team1.getTeamsHaventPlayed().size(); j++) {
-				if (teams
-						.get(i)
-						.getTeamName()
-						.equals(team1.getTeamsHaventPlayed().get(j)
-								.getTeamName())) {
-					z = j;
-					break;
+		breaker = 0;
+		do {
+			Collections.shuffle(team1.getTeamsHaventPlayed());
+			for (int i = 0; i < teams.size(); i++) {
+				for (int j = 0; j < team1.getTeamsHaventPlayed().size(); j++) {
+					if (teams
+							.get(i)
+							.getTeamName()
+							.equals(team1.getTeamsHaventPlayed().get(j)
+									.getTeamName())) {
+						z = j;
+						break;
+					}
 				}
 			}
-		}
+			breaker++;
+			if (breaker == 100)
+				return null;
+		} while (!crossReferenceTeamList(team1.getTeamsHaventPlayed(), team1
+				.getTeamsHaventPlayed().get(z).getTeamsHaventPlayed()));
 		Team team2 = team1.getTeamsHaventPlayed().get(z);
 		for (int j = 0; j < teams.size(); j++) {
 			if (teams.get(j).getTeamName().equals(team2.getTeamName())) {
@@ -135,8 +144,22 @@ public class Driver {
 		}
 		removeTeamFromList(team1, team2);
 		removeTeamFromList(team2, team1);
+		/*if (team1.getTeamName().equals("Grand Blanc")
+				|| team2.getTeamName().equals("Grand Blanc"))
+			System.out.println(team1.getTeamName() + " "
+					+ team1.getTeamsHaventPlayed().size() + " : "
+					+ team2.getTeamName() + " "
+					+ team2.getTeamsHaventPlayed().size());*/
 		// System.out.println("END: " + teams.size());
 		return new Game(team1, team2);
+	}
+
+	public int teamWithOneMoreLeft(ArrayList<Team> teams) {
+		for (int i = 0; i < teams.size(); i++) {
+			if (teams.get(i).getTeamsHaventPlayed().size() == 1)
+				return i;
+		}
+		return -1;
 	}
 
 	public boolean crossReferenceTeamList(ArrayList<Team> referenceList,
